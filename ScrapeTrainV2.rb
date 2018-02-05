@@ -11,7 +11,7 @@ end
 artist_url = ARGV[0].to_s
 artist_page = HTTParty.get(artist_url)
 artist_page_parsed = Nokogiri::HTML(artist_page)
-artist_name = artist_page_parsed.xpath('//*[@id="trackInfoSection"]/section/div[1]/section[1]/div/div[1]/div[2]').text
+artist_name = artist_url.split('/')[-1]
 track_list = artist_page_parsed.xpath('//*[@id="content"]/div/div[2]/div/section[1]/div[2]').children
 track_ids = []
 track_links = []
