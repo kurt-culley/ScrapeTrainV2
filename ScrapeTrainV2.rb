@@ -1,7 +1,7 @@
 require 'HTTParty'
 require 'Nokogiri'
-require 'JSON'
 require 'open-uri'
+require 'byebug'
 
 trap "SIGINT" do
   puts "Exiting..."
@@ -25,6 +25,7 @@ track_list.each do |track|
 end
 
 puts "[INFO] Track count: #{track_ids.count}"
+puts "[INFO] Building track hash array, please wait."
 
 track_ids.each do |track_id|
   track_info = HTTParty.get("https://traktrain.com/track/#{track_id}")
@@ -35,8 +36,11 @@ puts "[INFO] Creating directory '#{artist_name}' if it does not already exist."
 Dir.mkdir("#{artist_name}") unless File.exists?("#{artist_name}")
 
 track_hash_array.each do |track|
+  if track["name"].gsub!(/[^0-9a-z ]/i, '')
+    puts "[WARN] Track name '#{track["name"]}' contained invalid chars. Filename changed."
+  end
   puts "[INFO] Downloading: #{track["name"]}.mp3"
-  open("#{artist_name}/""#{track["name"]}.mp3", 'wb') do |f|
+  open("#{artist_name}/#{track["name"]}.mp3", 'wb') do |f|
     f << open("https://d2lvs3zi8kbddv.cloudfront.net/#{track["link"]}",
           "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
           "referer" => artist_url).read
