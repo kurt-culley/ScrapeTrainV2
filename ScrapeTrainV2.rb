@@ -1,7 +1,6 @@
 require 'HTTParty'
 require 'Nokogiri'
 require 'open-uri'
-require 'byebug'
 
 trap "SIGINT" do
   puts "Exiting..."
@@ -39,13 +38,18 @@ track_hash_array.each do |track|
   if track["name"].gsub!(/[^0-9a-z ]/i, '')
     puts "[WARN] Track name '#{track["name"]}' contained invalid chars. Filename changed."
   end
-  puts "[INFO] Downloading: #{track["name"]}.mp3"
   open("#{artist_name}/#{track["name"]}.mp3", 'wb') do |f|
-    f << open("https://d2lvs3zi8kbddv.cloudfront.net/#{track["link"]}",
-          "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
-          "referer" => artist_url).read
-  end
-  puts "[INFO] Complete: #{track["name"]}.mp3"
+    begin
+      puts "[INFO] Downloading: #{track["name"]}.mp3"
+      f << open("https://d2lvs3zi8kbddv.cloudfront.net/#{track["link"]}",
+        "User-Agent" => "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
+        "referer" => artist_url).read
+        puts "[INFO] Complete: #{track["name"]}.mp3"
+      rescue OpenURI::HTTPError => exception
+        puts "[ERROR] '#{track["name"]}' skipped. - #{exception} "
+      end
+    end
 end
+
 
 puts "[DONE]"
