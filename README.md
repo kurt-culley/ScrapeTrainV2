@@ -3,8 +3,7 @@ A simple TrakTrain beat downloader
 
 # Dependencies
 ```
-$ gem install httparty
-$ gem install nokogiri
+$ bundle install
 ```
 
 # Usage
