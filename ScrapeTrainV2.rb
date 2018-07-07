@@ -3,6 +3,7 @@ require 'HTTParty'
 require 'Nokogiri'
 require 'open-uri'
 require 'mp3info'
+require 'byebug'
 
 trap "SIGINT" do
   puts "Exiting..."
@@ -14,7 +15,7 @@ artist_url = ARGV[0].to_s
 artist_page = HTTParty.get(artist_url)
 artist_page_parsed = Nokogiri::HTML(artist_page)
 artist_name = artist_url.split('/')[-1]
-track_list = artist_page_parsed.xpath('//*[@id="content"]/div/div[2]/div/section[1]/div[2]').children
+track_list = artist_page_parsed.xpath('//*[@id="tracks-container"]').children
 track_ids = []
 track_links = []
 track_hash_array = []
@@ -38,13 +39,15 @@ puts "[INFO] Building track hash array, please wait."
 # This information is then used to build an array of track hashes, each
 # containing the title, artist, album, track number, mp3 url and
 # album artwork url.
+
 track_ids.each_with_index do |track_id, index|
   track_info = HTTParty.get("https://traktrain.com/track/#{track_id}")
+  tracknum = index + 1
   track_hash_array << {
-    'title' => track_info['name'].gsub(/[^0-9a-z ]/i, ''), # Sanitize for filename
+    'title' => "#{tracknum}. " + track_info['name'].gsub(/[^0-9a-z ]/i, ''), # Sanitize for filename
     'artist' => artist_name,
     'album' => 'Traktrain',
-    'tracknum' => index + 1,
+    'tracknum' => tracknum,
     'link'=> track_info['link'],
     'image' => track_info['image']}
 end
