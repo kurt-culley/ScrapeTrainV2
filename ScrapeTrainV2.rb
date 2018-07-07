@@ -3,7 +3,6 @@ require 'HTTParty'
 require 'Nokogiri'
 require 'open-uri'
 require 'mp3info'
-require 'byebug'
 
 trap "SIGINT" do
   puts "Exiting..."
@@ -39,7 +38,6 @@ puts "[INFO] Building track hash array, please wait."
 # This information is then used to build an array of track hashes, each
 # containing the title, artist, album, track number, mp3 url and
 # album artwork url.
-
 track_ids.each_with_index do |track_id, index|
   track_info = HTTParty.get("https://traktrain.com/track/#{track_id}")
   tracknum = index + 1
