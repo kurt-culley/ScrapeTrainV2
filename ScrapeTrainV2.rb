@@ -53,6 +53,8 @@ end
 puts "[INFO] Creating directory '#{artist_name}' if it does not already exist."
 Dir.mkdir("#{artist_name}") unless File.exists?("#{artist_name}")
 
+track_success = true
+
 # Iterate through track_hash_array, for each track we download the mp3 and
 # save under artist_name/track_title.mp3.
 # We then insert the ID3 tags for the MP3, first downloading and inserting
@@ -69,10 +71,12 @@ track_hash_array.each do |track|
         puts "[INFO] Complete: #{track["title"]}.mp3"
       rescue OpenURI::HTTPError => exception
         puts "[ERROR] '#{track["title"]}' skipped. - #{exception} "
+        track_success = false
       end
     end
     # Insert ID3 tags
-    Mp3Info.open("#{artist_name}/#{track["title"]}.mp3") do |mp3|
+    if track_success
+      Mp3Info.open("#{artist_name}/#{track["title"]}.mp3") do |mp3|
         begin
           artwork = open("https://d369yr65ludl8k.cloudfront.net/#{track["image"]}",
             "User-Agent" => user_agent,
@@ -85,6 +89,10 @@ track_hash_array.each do |track|
         mp3.tag.artist = artist_name
         mp3.tag.album = track["album"]
         mp3.tag.tracknum = track["tracknum"]
+      end
+    else
+      File.delete("#{artist_name}/#{track["title"]}.mp3") if File.exists?("#{artist_name}/#{track["title"]}.mp3")
+      track_success = true
     end
 end
 
